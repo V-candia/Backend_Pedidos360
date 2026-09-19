@@ -35,7 +35,7 @@ public class ProductController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('Admin','Operador','Cliente')")
+    @PreAuthorize("hasAnyRole('Admin','Operador','Cliente','Auditor')")
     List<Product> list() {
         return repo.findAll();
     }
