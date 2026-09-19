@@ -10,11 +10,7 @@
         { "requestParam": "client_id", "match": "operador",
           "claims": { "sub": "operador@pedidos360.local", "preferred_username": "operador@pedidos360.local", "name": "Operador Local", "aud": ["api://pedidos360-local"], "roles": ["Operador"] } },
         { "requestParam": "client_id", "match": "cliente",
-          "claims": { "sub": "cliente@pedidos360.local", "preferred_username": "cliente@pedidos360.local", "name": "Cliente Local", "aud": ["api://pedidos360-local"], "roles": ["Cliente"] } },
-        { "requestParam": "client_id", "match": "cliente2",
-          "claims": { "sub": "cliente2@pedidos360.local", "preferred_username": "cliente2@pedidos360.local", "name": "Cliente Dos", "aud": ["api://pedidos360-local"], "roles": ["Cliente"] } },
-        { "requestParam": "client_id", "match": "auditor",
-          "claims": { "sub": "auditor@pedidos360.local", "preferred_username": "auditor@pedidos360.local", "name": "Auditor Local", "aud": ["api://pedidos360-local"], "roles": ["Auditor"] } }
+          "claims": { "sub": "cliente@pedidos360.local", "preferred_username": "cliente@pedidos360.local", "name": "Cliente Local", "aud": ["api://pedidos360-local"], "roles": ["Cliente"] } }
       ]
     }
   ]
