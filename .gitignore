@@ -1,0 +1,44 @@
+# Build
+target/
+*.class
+*.jar
+*.war
+*.log
+hs_err_pid*
+replay_pid*
+
+# Secretos y config local (el .env.example sí se versiona)
+.env
+.env.*
+!.env.example
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated/
+.springBeans
+nbproject/
+nbbuild/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporales y volcados
+*.tmp
+*.bak
+*.swp
+*~
+*.dump
+*.hprof
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+dependency-reduced-pom.xml

@@ -1,0 +1,12 @@
+spring:
+  config.import: classpath:common.yml
+  application.name: ms-pedidos360-notify
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASSWORD:guest}
+    listener.simple:
+      default-requeue-rejected: false # tras agotar reintentos el mensaje va a q.cmd.email.dlq
+      retry: { enabled: true, max-attempts: 3 }
+  # spring.mail.host / username / password: si no se define host, el email se loguea en vez de enviarse
+server.port: 8083

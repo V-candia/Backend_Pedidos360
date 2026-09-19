@@ -1,0 +1,8 @@
+# Importado por cada servicio con spring.config.import: classpath:common.yml
+spring:
+  security.oauth2.resourceserver.jwt.issuer-uri: https://login.microsoftonline.com/${TENANT_ID}/v2.0
+  jpa:
+    open-in-view: false
+    hibernate.ddl-auto: update # ponytail: update no es apto para prod; migrar a Flyway cuando el esquema se estabilice
+app.audience: api://${API_CLIENT_ID}
+management.endpoints.web.exposure.include: health

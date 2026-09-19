@@ -1,0 +1,13 @@
+spring:
+  config.import: classpath:common.yml
+  application.name: ms-pedidos360-audit
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    consumer:
+      group-id: audit
+      auto-offset-reset: earliest
+server.port: 8084

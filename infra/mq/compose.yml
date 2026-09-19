@@ -1,0 +1,15 @@
+# ec2-mq. Security Group: 5672 solo desde ec2-apps; 15672 (management UI) solo desde tu IP.
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    # El usuario pedidos360 (pass inicial: pedidos360) sale de definitions.json: con definiciones cargadas RabbitMQ
+    # no siembra RABBITMQ_DEFAULT_USER. Cambiar la clave: rabbitmqctl change_password pedidos360 <nueva>
+    ports: ["5672:5672", "15672:15672"]
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/conf.d/20-definitions.conf:ro
+      - ./definitions.json:/etc/rabbitmq/definitions.json:ro
+      - rabbit-data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+volumes:
+  rabbit-data:
