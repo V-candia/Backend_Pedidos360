@@ -28,8 +28,6 @@ curl -s -X POST http://localhost:8080/default/token \
 | `admin` | Admin | admin@pedidos360.local |
 | `operador` | Operador | operador@pedidos360.local |
 | `cliente` | Cliente | cliente@pedidos360.local |
-| `cliente2` | Cliente | cliente2@pedidos360.local (para probar que no ve pedidos ajenos) |
-| `auditor` | Auditor | auditor@pedidos360.local |
 
 Respuesta: `{"access_token": "...", ...}`. Enviarlo como `Authorization: Bearer <access_token>`. Dura 24 h.
 El frontend necesita un modo dev que haga este POST en vez de MSAL (MSAL no funciona contra este emisor).
