@@ -42,3 +42,6 @@ desktop.ini
 # Maven
 .mvn/wrapper/maven-wrapper.jar
 dependency-reduced-pom.xml
+
+# Instrucciones locales de Claude
+CLAUDE.md
