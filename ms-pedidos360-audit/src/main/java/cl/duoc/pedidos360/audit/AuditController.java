@@ -21,7 +21,7 @@ public class AuditController {
     }
 
     @GetMapping("/events")
-    @PreAuthorize("hasAnyRole('Admin','Auditor')")
+    @PreAuthorize("hasRole('Admin')")
     List<AuditEvent> events(@RequestParam(required = false) String userId, @RequestParam(required = false) Instant from,
                             @RequestParam(required = false) Instant to, @RequestParam(required = false) String eventType) {
         Specification<AuditEvent> s = (r, q, cb) -> cb.conjunction();
