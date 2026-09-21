@@ -1,0 +1,12 @@
+# Valida tokens de Azure AD real en vez del mock: docker compose -f compose.yml -f compose.azure.yml up -d --build
+x-azure: &azure
+  TENANT_ID: 7d299207-02b5-4afd-9826-5edf22134e00
+  API_CLIENT_ID: e17d6c18-3e48-4533-afb4-6c5c0cebe145
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://login.microsoftonline.com/7d299207-02b5-4afd-9826-5edf22134e00/v2.0
+  APP_JWK_SET_URI: "" # vacío = descubre las claves desde el issuer
+
+services:
+  catalog: { environment: *azure }
+  orders:  { environment: *azure }
+  audit:   { environment: *azure }
+  report:  { environment: *azure }

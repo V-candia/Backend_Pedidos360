@@ -13,6 +13,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimValidator;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
@@ -40,8 +42,15 @@ public class SecurityConfig {
                 : NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
                 JwtValidators.createDefaultWithIssuer(issuer),
-                new JwtClaimValidator<List<String>>("aud", aud -> aud != null && aud.contains(audience))));
+                audienceValidator(audience)));
         return decoder;
+    }
+
+    /** Azure v2 emite aud = GUID del cliente; v1 emite api://GUID. Se aceptan ambos. */
+    static OAuth2TokenValidator<Jwt> audienceValidator(String audience) {
+        String clientId = audience.replaceFirst("^api://", "");
+        return new JwtClaimValidator<List<String>>("aud",
+                aud -> aud != null && (aud.contains(audience) || aud.contains(clientId)));
     }
 
     @Bean
