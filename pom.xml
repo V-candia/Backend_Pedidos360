@@ -25,6 +25,7 @@
     <module>ms-pedidos360-notify</module>
     <module>ms-pedidos360-audit</module>
     <module>ms-pedidos360-report</module>
+    <module>ms-pedidos360-mqadmin</module>
   </modules>
 
   <dependencyManagement>
