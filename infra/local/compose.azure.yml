@@ -6,7 +6,8 @@ x-azure: &azure
   APP_JWK_SET_URI: "" # vacío = descubre las claves desde el issuer
 
 services:
-  catalog: { environment: *azure }
-  orders:  { environment: *azure }
-  audit:   { environment: *azure }
-  report:  { environment: *azure }
+  catalog:  { environment: *azure }
+  orders:   { environment: *azure }
+  audit:    { environment: *azure }
+  report:   { environment: *azure }
+  mqadmin:  { environment: *azure }
