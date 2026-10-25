@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.mail.SimpleMailMessage;
@@ -12,6 +13,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 import cl.duoc.pedidos360.common.EmailCommand;
+import cl.duoc.pedidos360.common.MqNames;
 
 @Component
 class EmailListener {
@@ -25,9 +27,16 @@ class EmailListener {
         this.mail = mail;
     }
 
-    /** ACK al terminar; si lanza excepción se reintenta y luego va a q.cmd.email.dlq (NACK sin requeue). */
-    @RabbitListener(queues = "q.cmd.email")
+    /**
+     * ACK al terminar. Mensaje malformado (sin destinatario): no recuperable, se rechaza directo a
+     * q.cmd.email.dlq sin reintentar (AmqpRejectAndDontRequeueException). Cualquier otra falla (ej. SMTP
+     * caído) es transitoria: se reintenta hasta 3 veces (ver application.yml) y recién ahí cae a la DLQ.
+     */
+    @RabbitListener(queues = MqNames.QUEUE_EMAIL)
     void onEmail(EmailCommand c) {
+        if (c.to() == null || c.to().isBlank()) {
+            throw new AmqpRejectAndDontRequeueException("EmailCommand sin destinatario: " + c.eventId());
+        }
         if (processed.contains(c.eventId())) return;
         String text = "Tu pedido " + c.orderId() + " está ahora en estado " + c.status();
         JavaMailSender sender = mail.getIfAvailable();

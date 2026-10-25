@@ -92,12 +92,23 @@ services:
     build: { context: ../.., args: { MODULE: ms-pedidos360-report } }
     depends_on: { oracle: { condition: service_healthy }, kafka: { condition: service_started } }
 
+  mqadmin:
+    <<: *svc
+    build: { context: ../.., args: { MODULE: ms-pedidos360-mqadmin } }
+    depends_on: { rabbitmq: { condition: service_healthy } }
+
+  # Repo aparte, clonado como hermano de este: git clone .../Frontend_pedidos360.git /opt/pedidos360-frontend
+  # VITE_MODE=cloud hace que el build use .env.cloud (URL de redirect y de API distintas a localhost).
+  frontend:
+    build: { context: ../../../pedidos360-frontend, args: { VITE_MODE: cloud } }
+    restart: unless-stopped
+
   gateway:
     image: nginx:1.27-alpine
     restart: unless-stopped
     ports: ["80:80"]
     volumes: [./nginx.conf:/etc/nginx/conf.d/default.conf:ro]
-    depends_on: [orders, catalog, audit, report]
+    depends_on: [orders, catalog, audit, report, mqadmin, frontend]
 
 volumes:
   oracle-data:

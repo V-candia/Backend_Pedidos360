@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -19,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import cl.duoc.pedidos360.common.ApiException;
 import cl.duoc.pedidos360.common.EmailCommand;
+import cl.duoc.pedidos360.common.InvoiceCommand;
+import cl.duoc.pedidos360.common.KitchenTicketCommand;
 import cl.duoc.pedidos360.common.OrderEvent;
 
 @Service
@@ -30,13 +31,13 @@ public class OrderService {
     private final OrderRepository repo;
     private final CatalogClient catalog;
     private final KafkaTemplate<String, Object> kafka;
-    private final RabbitTemplate rabbit;
+    private final CommandPublisher commands;
 
-    OrderService(OrderRepository repo, CatalogClient catalog, KafkaTemplate<String, Object> kafka, RabbitTemplate rabbit) {
+    OrderService(OrderRepository repo, CatalogClient catalog, KafkaTemplate<String, Object> kafka, CommandPublisher commands) {
         this.repo = repo;
         this.catalog = catalog;
         this.kafka = kafka;
-        this.rabbit = rabbit;
+        this.commands = commands;
     }
 
     /** owner != null restringe a los pedidos de ese cliente. */
@@ -112,8 +113,16 @@ public class OrderService {
                     o.updatedAt, total, from == null ? null : from.name(), o.status.name());
             kafka.send("orders.events", o.id, e); // misma key = mismo partition = orden por pedido
             kafka.send("audit.timeline", e.eventId(), e);
-            rabbit.convertAndSend("cmd.direct", "email.send", new EmailCommand("email.send", e.eventId(), e.timestamp(),
+            commands.sendEmail(new EmailCommand("email.send", e.eventId(), e.timestamp(),
                     UUID.randomUUID().toString(), o.id, o.customerId, o.id, o.status.name()));
+            if (o.status == OrderStatus.ACEPTADO) {
+                var items = o.items.stream().map(i -> new KitchenTicketCommand.Item(i.productName(), i.qty())).toList();
+                commands.sendKitchenTicket(new KitchenTicketCommand("kitchen.ticket", UUID.randomUUID().toString(),
+                        o.updatedAt, o.id, o.customerName, items));
+            } else if (o.status == OrderStatus.ENTREGADO) {
+                commands.sendInvoice(new InvoiceCommand("invoice.gen", UUID.randomUUID().toString(),
+                        o.updatedAt, o.id, o.customerName, total));
+            }
         } catch (RuntimeException ex) {
             log.warn("No se pudo publicar evento/notificación del pedido {}", o.id, ex);
         }
