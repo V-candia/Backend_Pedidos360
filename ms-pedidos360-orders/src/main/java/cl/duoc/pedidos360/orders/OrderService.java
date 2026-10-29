@@ -119,13 +119,24 @@ public class OrderService {
                 var items = o.items.stream().map(i -> new KitchenTicketCommand.Item(i.productName(), i.qty())).toList();
                 commands.sendKitchenTicket(new KitchenTicketCommand("kitchen.ticket", UUID.randomUUID().toString(),
                         o.updatedAt, o.id, o.customerName, items));
-            } else if (o.status == OrderStatus.ENTREGADO) {
-                commands.sendInvoice(new InvoiceCommand("invoice.gen", UUID.randomUUID().toString(),
-                        o.updatedAt, o.id, o.customerName, total));
             }
+            // la factura ya no se dispara sola al ENTREGADO: la pide un Admin a mano, ver generateInvoice()
         } catch (RuntimeException ex) {
             log.warn("No se pudo publicar evento/notificación del pedido {}", o.id, ex);
         }
+    }
+
+    /** Dispara el PDF de factura a mano. Solo si el pedido ya está ENTREGADO. */
+    Order generateInvoice(String id) {
+        Order o = repo.findById(id).orElseThrow(this::notFound);
+        if (o.status != OrderStatus.ENTREGADO) {
+            throw new ApiException(HttpStatus.CONFLICT, "NOT_DELIVERED", "El pedido debe estar ENTREGADO para facturar");
+        }
+        long total = o.items.stream().mapToLong(i -> i.qty() * i.price()).sum();
+        var items = o.items.stream().map(i -> new InvoiceCommand.Item(i.productName(), i.qty(), i.price())).toList();
+        commands.sendInvoice(new InvoiceCommand("invoice.gen", UUID.randomUUID().toString(),
+                Instant.now(), o.id, o.customerName, total, items));
+        return o;
     }
 
     private ApiException notFound() {
