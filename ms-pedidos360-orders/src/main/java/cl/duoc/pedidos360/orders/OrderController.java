@@ -67,6 +67,13 @@ public class OrderController {
         return service.updateStatus(id, r.status(), who(auth));
     }
 
+    /** Dispara el PDF de factura (vía RabbitMQ → notify). Antes se generaba solo al llegar a ENTREGADO; ahora es a pedido. */
+    @PostMapping("/{id}/invoice")
+    @PreAuthorize("hasRole('Admin')")
+    Order generateInvoice(@PathVariable String id) {
+        return service.generateInvoice(id);
+    }
+
     /** null para Admin/Operador (ven todo); para Cliente, su identidad del token (nunca un id enviado por el cliente). */
     private String owner(Authentication auth) {
         boolean staff = auth.getAuthorities().stream()

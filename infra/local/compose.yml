@@ -89,6 +89,7 @@ services:
     <<: *svc
     build: { context: ../.., args: { MODULE: ms-pedidos360-notify } }
     depends_on: { rabbitmq: { condition: service_healthy } }
+    ports: ["8083:8083"]
 
   audit:
     <<: *svc
